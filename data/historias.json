@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "slug": "el-remo-de-mi-mama",
+    "titulo": "El remo de mi mamá",
+    "categoria": "me-toco-irme",
+    "publicado": "2026-10-03",
+    "epoca": "ayer",
+    "ficticia": true,
+    "personaje": {
+      "nombre": "Marleny Mosquera",
+      "edad": 58,
+      "lugar": "Quibdó, Chocó"
+    },
+    "resumen": "Doña Marleny dejó su caserío sobre el río Atrato hace veinte años. Cuenta qué se llevó, qué se quedó y cómo un remo colgado en la sala le sirve para explicarles el río a sus nietos.",
+    "aviso": "Habla de desplazamiento forzado y de la pérdida del hogar.",
+    "etiquetas": ["mujeres", "desplazamiento", "pueblos afrodescendientes", "zona rural"],
+    "marcas": ["esperanza"],
+    "texto": "historias/001-el-remo-de-mi-mama/texto.md",
+    "portada": "historias/001-el-remo-de-mi-mama/portada.svg",
+    "portada_alt": "Ilustración de un remo de madera colgado en una pared, junto a una ventana en arco que da a un río al amanecer.",
+    "audio": null,
+    "entender": {
+      "titulo": "¿Qué es el desplazamiento forzado?",
+      "texto": "En Colombia, la Ley 387 de 1997 considera desplazada a la persona que tuvo que abandonar su lugar de residencia o sus actividades económicas habituales dentro del país, porque su vida, su integridad o su libertad estaban en peligro por la violencia. Puede ocurrirle a una persona, a una familia o a una comunidad entera. Para acceder a las medidas de atención y reparación, la persona declara los hechos ante el Ministerio Público y queda incluida en el Registro Único de Víctimas.",
+      "fuentes": [
+        "Ley 387 de 1997, artículo 1.",
+        "Unidad para las Víctimas, Registro Único de Víctimas (RUV)."
+      ]
+    }
+  }
+]

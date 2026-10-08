@@ -1,0 +1,51 @@
+[
+  {
+    "id": "me-toco-irme",
+    "nombre": "Me tocó irme",
+    "frase": "Historias de quienes tuvieron que dejar su casa.",
+    "descripcion": "Desplazamiento, confinamiento, migración y frontera.",
+    "color": "#1F6A8A"
+  },
+  {
+    "id": "falta-alguien",
+    "nombre": "Falta alguien",
+    "frase": "Quienes buscan y quienes no dejan de nombrar.",
+    "descripcion": "Desaparición forzada, familias buscadoras, identificación de cuerpos.",
+    "color": "#7A4E8C"
+  },
+  {
+    "id": "crecer-entre-fuegos",
+    "nombre": "Crecer entre fuegos",
+    "frase": "Ser joven en medio de una guerra que no pediste.",
+    "descripcion": "Reclutamiento, niñez y juventud, minas cerca de las escuelas, violencia en los barrios.",
+    "color": "#B9471E"
+  },
+  {
+    "id": "defender-la-vida",
+    "nombre": "Defender la vida",
+    "frase": "Personas que siguen trabajando aunque las amenacen.",
+    "descripcion": "Líderes sociales, firmantes de paz, periodistas, defensores del agua y del territorio.",
+    "color": "#2A7248"
+  },
+  {
+    "id": "miedo-de-todos-los-dias",
+    "nombre": "Miedo de todos los días",
+    "frase": "La violencia que se vive en la tienda, el bus o la vereda.",
+    "descripcion": "Extorsión, cobros ilegales, fronteras invisibles, atentados, economías ilegales.",
+    "color": "#825F0A"
+  },
+  {
+    "id": "heridas-que-no-se-ven",
+    "nombre": "Heridas que no se ven",
+    "frase": "Lo que la violencia dejó en el cuerpo y en la mente.",
+    "descripcion": "Violencia sexual, tortura, violencia en el hogar, secuelas emocionales.",
+    "color": "#A8365C"
+  },
+  {
+    "id": "mi-tierra-mi-cultura",
+    "nombre": "Mi tierra, mi cultura",
+    "frase": "Cuando lo que se ataca es el territorio y la forma de vivir de una comunidad.",
+    "descripcion": "Pueblos indígenas, afrodescendientes y campesinos, despojo, daño ambiental.",
+    "color": "#6B5B3E"
+  }
+]

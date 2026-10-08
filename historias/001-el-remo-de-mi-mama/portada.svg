@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Un remo de madera colgado en una pared, junto a una ventana en arco que da a un río al amanecer.">
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fb7b0"/>
+      <stop offset="1" stop-color="#f6dc9c"/>
+    </linearGradient>
+    <linearGradient id="agua" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d8a90"/>
+      <stop offset="1" stop-color="#1d5a63"/>
+    </linearGradient>
+    <clipPath id="ventana">
+      <path d="M700 670V300A160 160 0 0 1 1020 300V670Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- pared y piso -->
+  <rect width="1200" height="800" fill="#1d4655"/>
+  <rect y="700" width="1200" height="100" fill="#14323d"/>
+  <rect y="692" width="1200" height="10" fill="#0f2730"/>
+
+  <!-- ventana en arco con vista al río -->
+  <g clip-path="url(#ventana)">
+    <rect x="700" y="140" width="320" height="540" fill="url(#cielo)"/>
+    <circle cx="860" cy="500" r="64" fill="#fff1c4"/>
+    <path d="M700 520C760 470 800 500 850 480S960 450 1020 490V680H700Z" fill="#2f6e5f"/>
+    <path d="M700 560C770 520 840 550 900 535S980 520 1020 540V680H700Z" fill="#1f4f47"/>
+    <rect x="700" y="570" width="320" height="110" fill="url(#agua)"/>
+    <g stroke="#ffffff" stroke-opacity=".32" stroke-width="3" fill="none" stroke-linecap="round">
+      <path d="M720 600q20-6 40 0t40 0 40 0 40 0 40 0 40 0 40 0"/>
+      <path d="M700 630q20-6 40 0t40 0 40 0 40 0 40 0 40 0 40 0"/>
+      <path d="M730 655q20-6 40 0t40 0 40 0 40 0 40 0 40 0"/>
+    </g>
+    <path d="M790 590C810 600 850 600 870 590L862 584C846 588 814 588 798 584Z" fill="#0b1417"/>
+  </g>
+  <path d="M700 670V300A160 160 0 0 1 1020 300V670Z" fill="none" stroke="#0f2a33" stroke-width="16"/>
+  <path d="M860 140V670M700 420H1020" stroke="#0f2a33" stroke-width="9"/>
+  <rect x="682" y="668" width="356" height="18" rx="3" fill="#0f2a33"/>
+
+  <!-- remo colgado (sombra y madera) -->
+  <g transform="rotate(-22 330 420)">
+    <g transform="translate(16 12)" fill="#000" opacity=".28">
+      <rect x="318" y="90" width="24" height="430" rx="12"/>
+      <rect x="290" y="82" width="80" height="24" rx="12"/>
+      <path d="M330 500C268 522 260 650 330 740C400 650 392 522 330 500Z"/>
+    </g>
+    <rect x="318" y="90" width="24" height="430" rx="12" fill="#d9a566"/>
+    <rect x="290" y="82" width="80" height="24" rx="12" fill="#e0b074"/>
+    <path d="M330 500C268 522 260 650 330 740C400 650 392 522 330 500Z" fill="#e0b074"/>
+    <path d="M330 506V728" stroke="#b57c3c" stroke-width="5" stroke-linecap="round"/>
+    <path d="M318 130V480" stroke="#b57c3c" stroke-width="2" stroke-opacity=".5"/>
+  </g>
+
+  <!-- clavos -->
+  <circle cx="268" cy="250" r="9" fill="#0f2a33"/>
+  <circle cx="436" cy="548" r="9" fill="#0f2a33"/>
+</svg>
