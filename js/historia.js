@@ -48,6 +48,8 @@
       <a class="cat-enlace" href="index.html?cat=${encodeURIComponent(cat.id)}">${esc(cat.nombre)}</a>
       <h1>${esc(h.titulo)}</h1>
       <p class="bajada">${esc(h.resumen)}</p>
+      <div class="acciones" id="acciones" role="group" aria-label="Acciones de la historia"></div>
+      <p class="estado-accion" id="estado-accion" role="status" aria-live="polite"></p>
     </header>
 
     <figure class="portada" style="margin-left:0;margin-right:0">
@@ -70,6 +72,7 @@
         ${h.aviso ? `<p class="aviso-hist">${ICONO_AVISO}<span><strong>Aviso de contenido.</strong> ${esc(h.aviso)}</span></p>` : ""}
         ${h.ficticia ? `<p class="ficticia">${esc(SITIO.ficticiaTexto)}</p>` : ""}
         <div class="texto" id="texto">${textoHTML}</div>
+        <div id="fin-texto" aria-hidden="true"></div>
 
         ${h.entender ? `<section class="entender" aria-labelledby="entender-t">
           <h2 id="entender-t">${esc(h.entender.titulo || "Para entender")}</h2>
@@ -77,7 +80,13 @@
           ${(h.entender.fuentes || []).length ? `<p class="fuentes-t">Fuentes</p><ul>${h.entender.fuentes.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
         </section>` : ""}
 
-        <p class="apoyo"><strong>Si esta historia te removió algo:</strong> ${SITIO.apoyo.map(esc).join(" ")}</p>
+        <div class="cierre" id="cierre" hidden>
+          <p class="pausa">Si lo necesitas, haz una pausa antes de seguir. Respirar también es parte de escuchar.</p>
+          <p class="progreso-cierre" id="progreso-cierre"></p>
+          ${SITIO.facebook && SITIO.facebook.url ? `<p><a class="boton sec" data-facebook></a></p>` : ""}
+        </div>
+
+        <p class="apoyo"><strong>Si esta historia te removió algo:</strong> ${SITIO.apoyo.map(textoApoyo).join(" ")}</p>
       </div>
     </div>
 
@@ -88,6 +97,9 @@
   </article>`;
 
   document.title = `${h.titulo} · ${SITIO.nombre}`;
+  pintarMarco();
+  prepararAcciones(h, categorias);
+  prepararFinal(h, categorias);
   prepararEscucha(h);
 })();
 
@@ -99,6 +111,8 @@ function prepararEscucha(h) {
     caja.innerHTML = `<h2>Escuchar</h2>
       <audio controls preload="none" src="${esc(h.audio)}">Tu navegador no puede reproducir audio.</audio>
       <p class="nota">Narración grabada.</p>`;
+    const au = $("#escucha audio");
+    if (au) au.addEventListener("ended", () => { if (window.__terminarHistoria) window.__terminarHistoria(); });
     return;
   }
 
@@ -156,7 +170,7 @@ function prepararEscucha(h) {
 
   function hablar() {
     if (!activo) return;
-    if (i >= frases.length) { activo = false; i = 0; frases.forEach(f => f.classList.remove("leyendo")); etiqueta(); return; }
+    if (i >= frases.length) { activo = false; i = 0; frases.forEach(f => f.classList.remove("leyendo")); etiqueta(); if (window.__terminarHistoria) window.__terminarHistoria(); return; }
     marcar(i);
     const mio = ++ticket;
     const u = new SpeechSynthesisUtterance(frases[i].textContent.trim());
@@ -191,4 +205,96 @@ function prepararEscucha(h) {
     setTimeout(hablar, 80);
   });
   window.addEventListener("pagehide", () => { ticket++; sintesis.cancel(); });
+}
+
+
+/* ---------- Guardar, vela y compartir ---------- */
+function prepararAcciones(h, categorias) {
+  const caja = $("#acciones"), msg = $("#estado-accion");
+  let temporizador = 0;
+  const avisar = t => {
+    msg.textContent = t;
+    clearTimeout(temporizador);
+    temporizador = setTimeout(() => { msg.textContent = ""; }, 4000);
+  };
+  const nombreCorto = (h.personaje && h.personaje.nombre) ? h.personaje.nombre.split(" ")[0] : "";
+
+  function pintar() {
+    const guardada = Lector.tiene("guardadas", h.id);
+    const vela = Lector.tiene("velas", h.id);
+    caja.innerHTML = `
+      <button type="button" class="accion" id="a-guardar" aria-pressed="${guardada}">${ICONO_MARCADOR}<span>${guardada ? "Guardada" : "Guardar para después"}</span></button>
+      <button type="button" class="accion accion-vela" id="a-vela" aria-pressed="${vela}">${ICONO_VELA_BOTON}<span>${vela ? "Vela encendida" : "Encender una vela"}</span></button>
+      <button type="button" class="accion" id="a-compartir">${ICONO_COMPARTIR}<span>Compartir</span></button>`;
+  }
+  pintar();
+
+  caja.addEventListener("click", async e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.id === "a-guardar") {
+      const quedo = Lector.alternar("guardadas", h.id); pintar();
+      $("#a-guardar").focus();
+      avisar(quedo ? "Historia guardada en este navegador." : "Quitada de tus guardadas.");
+    } else if (b.id === "a-vela") {
+      const quedo = Lector.alternar("velas", h.id); pintar();
+      $("#a-vela").focus();
+      avisar(quedo ? "Vela encendida" + (nombreCorto ? " por " + nombreCorto : "") + ". Solo la ves tú." : "Vela apagada.");
+    } else if (b.id === "a-compartir") {
+      const enlace = urlCompartible(h.slug);
+      const texto = `${h.titulo}. ${SITIO.nombre}: ${SITIO.lema}`;
+      if (navigator.share) {
+        try { await navigator.share({ title: h.titulo, text: texto, url: enlace }); return; }
+        catch (err) { if (err && err.name === "AbortError") return; }
+      }
+      mostrarOpcionesCompartir(enlace, texto, avisar);
+    }
+  });
+}
+
+function mostrarOpcionesCompartir(enlace, texto, avisar) {
+  let panel = $("#panel-compartir");
+  if (panel) { panel.remove(); return; }
+  panel = document.createElement("div");
+  panel.id = "panel-compartir"; panel.className = "panel-compartir";
+  panel.innerHTML = `
+    <a class="boton sec" target="_blank" rel="noopener noreferrer" href="https://wa.me/?text=${encodeURIComponent(texto + " " + enlace)}">WhatsApp</a>
+    <button type="button" class="boton sec" id="c-copiar">Copiar enlace</button>`;
+  $("#acciones").after(panel);
+  $("#c-copiar").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(enlace);
+      avisar("Enlace copiado.");
+    } catch (err) {
+      window.prompt("Copia este enlace:", enlace);
+    }
+  });
+}
+
+/* ---------- Final de la historia: cuenta para el recorrido ---------- */
+function prepararFinal(h, categorias) {
+  const fin = $("#fin-texto");
+  let hecho = false;
+
+  function terminar() {
+    if (hecho) return; hecho = true;
+    const nuevo = Lector.agregar("leidas", h.id);
+    const cierre = $("#cierre");
+    if (!cierre) return;
+    cierre.hidden = false;
+    pintarMarco();
+    cargarJSON("data/historias.json").then(todas => {
+      const leidas = Lector.lista("leidas");
+      const cats = new Set(todas.filter(x => leidas.includes(x.id)).map(x => x.categoria));
+      const p = $("#progreso-cierre");
+      if (p) p.textContent = `Has recorrido ${cats.size} de ${categorias.length} formas de contar.` + (nuevo ? "" : " Ya habías terminado esta historia.");
+    }).catch(() => {});
+  }
+  window.__terminarHistoria = terminar;
+
+  if (typeof window.IntersectionObserver === "function" && fin) {
+    const obs = new IntersectionObserver(entradas => {
+      if (entradas.some(en => en.isIntersecting)) { terminar(); obs.disconnect(); }
+    }, { threshold: 0 });
+    obs.observe(fin);
+  }
 }

@@ -13,6 +13,13 @@ const SITIO = {
   historiasFicticias: true,
   ficticiaIntro: "En esta versión de prueba, las historias son ficticias y se inspiran en patrones documentados por instituciones de memoria.",
   ficticiaTexto: "Historia ficticia, inspirada en patrones que las instituciones de memoria han documentado. Cualquier parecido con una persona real es casual.",
+  // Grupo de Facebook. Deja url en "" para ocultar los enlaces.
+  facebook: {
+    url: "https://www.facebook.com/share/g/1BtXDXqNYc/",
+    texto: "Ir al grupo de Facebook"
+  },
+  // Salida rápida: lleva a un sitio neutral. Cambia la dirección si prefieres otra.
+  salidaRapida: { url: "https://www.google.com.co", texto: "Salida rápida" },
   // Verifica estos datos antes de publicar.
   apoyo: [
     "En Bogotá, la línea 106 atiende salud mental.",
@@ -23,6 +30,11 @@ const SITIO = {
 
 /* ---------- Utilidades ---------- */
 const $ = (selector, raiz = document) => raiz.querySelector(selector);
+
+/* Texto de apoyo: escapa y destaca los números de las líneas de ayuda. */
+const textoApoyo = t => String(t ?? "").replace(/[&<>"']/g, c => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+)).replace(/\b\d{3}\b/g, '<strong class="linea">$&</strong>');
 
 const esc = valor => String(valor ?? "").replace(/[&<>"']/g, c => (
   { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
@@ -45,6 +57,14 @@ function ordenarRecientes(lista) {
   return [...lista].sort((a, b) => b.publicado.localeCompare(a.publicado) || b.id - a.id);
 }
 
+/* Dirección completa y limpia de una historia, para compartir. */
+function urlCompartible(slug) {
+  const u = new URL("historia.html", location.href);
+  u.search = "?id=" + encodeURIComponent(slug);
+  u.hash = "";
+  return u.href;
+}
+
 async function cargarJSON(ruta) {
   const r = await fetch(ruta, { cache: "no-cache" });
   if (!r.ok) throw new Error(`No se pudo cargar ${ruta} (${r.status})`);
@@ -64,6 +84,53 @@ function mostrarError(error, contenedor) {
     : `<p>Revisa que los archivos de la carpeta <code>data</code> existan y que el JSON esté bien escrito.</p>`;
   (contenedor || $("main")).innerHTML = `<div class="error" role="alert"><p><strong>No pudimos cargar las historias.</strong></p>${ayuda}<p>Detalle técnico: ${esc(error.message || error)}</p></div>`;
 }
+
+/* ---------- Memoria del lector ----------
+   Lo que cada persona guarda (historias guardadas, velas, recorrido y por dónde
+   iba leyendo) vive SOLO en su navegador. No se envía a ningún servidor.
+   Si el navegador no permite guardar, funciona mientras la página siga abierta. */
+const Lector = (() => {
+  const PREFIJO = "manemus:";
+  const respaldo = {};
+
+  function leer(clave, defecto) {
+    try {
+      const v = localStorage.getItem(PREFIJO + clave);
+      if (v !== null) return JSON.parse(v);
+    } catch (e) { /* sin almacenamiento disponible */ }
+    return clave in respaldo ? respaldo[clave] : defecto;
+  }
+  function guardar(clave, valor) {
+    respaldo[clave] = valor;
+    try { localStorage.setItem(PREFIJO + clave, JSON.stringify(valor)); } catch (e) { /* ignorar */ }
+  }
+  function lista(clave) {
+    const v = leer(clave, []);
+    return Array.isArray(v) ? v : [];
+  }
+  function tiene(clave, id) { return lista(clave).includes(id); }
+  /* Agrega o quita. Devuelve true si quedó agregado. */
+  function alternar(clave, id) {
+    const l = lista(clave), i = l.indexOf(id);
+    if (i >= 0) l.splice(i, 1); else l.push(id);
+    guardar(clave, l);
+    return i < 0;
+  }
+  /* Agrega si no estaba. Devuelve true si era nuevo. */
+  function agregar(clave, id) {
+    const l = lista(clave);
+    if (l.includes(id)) return false;
+    l.push(id); guardar(clave, l);
+    return true;
+  }
+  function borrarTodo() {
+    Object.keys(respaldo).forEach(k => delete respaldo[k]);
+    try {
+      Object.keys(localStorage).filter(k => k.startsWith(PREFIJO)).forEach(k => localStorage.removeItem(k));
+    } catch (e) { /* ignorar */ }
+  }
+  return { leer, guardar, lista, tiene, alternar, agregar, borrarTodo };
+})();
 
 /* ---------- Markdown mínimo ----------
    Admite: párrafos, "## subtítulo", "> cita", **negrita** y *cursiva*. */
@@ -90,19 +157,33 @@ function frasesDe(texto) {
   return m ? m.map(s => s.trim()).filter(Boolean) : [texto];
 }
 
-/* ---------- Franja de prototipo y pie (se escriben una sola vez aquí) ---------- */
+/* ---------- Marco común: franja de prototipo, pie y enlaces ---------- */
 function pintarMarco() {
   document.querySelectorAll(".marca").forEach(m => { m.textContent = SITIO.nombre; });
+
   const nota = $("#ficticia-intro");
   if (nota) {
     if (SITIO.historiasFicticias && SITIO.ficticiaIntro) { nota.textContent = SITIO.ficticiaIntro; nota.hidden = false; }
     else nota.remove();
   }
+
+  const fb = SITIO.facebook && SITIO.facebook.url;
+  document.querySelectorAll("[data-facebook]").forEach(a => {
+    if (fb) {
+      a.href = fb; a.target = "_blank"; a.rel = "noopener noreferrer";
+      if (!a.textContent.trim()) a.textContent = SITIO.facebook.texto;
+    } else a.remove();
+  });
+
   const franja = $("#proto");
   if (franja) {
     if (SITIO.avisoPrototipo) franja.textContent = SITIO.avisoPrototipo;
     else franja.remove();
   }
+
+  instalarFiltroDuotono();
+  instalarSalidaRapida();
+
   const pie = $("#pie");
   if (pie) {
     pie.innerHTML = `<div class="envoltura">
@@ -110,14 +191,82 @@ function pintarMarco() {
         <h2>Sobre estas historias</h2>
         <p>${esc(SITIO.ficticiaTexto)}</p>
       </div>
-      <div>
+      <div class="modulo-apoyo">
         <h2>Si algo de lo que leíste o escuchaste te removió</h2>
-        <p>${SITIO.apoyo.map(esc).join(" ")}</p>
+        <p>${SITIO.apoyo.map(textoApoyo).join(" ")}</p>
         <p>${esc(SITIO.instituciones)}</p>
       </div>
+      <div>
+        <h2>Tu seguridad</h2>
+        <p>El botón <strong>${esc((SITIO.salidaRapida || {}).texto || "Salida rápida")}</strong> te lleva a un sitio neutral y cierra la sesión de esta página. Tampoco hace falta usar el ratón: pulsa la tecla Esc dos veces.</p>
+        <p>No borra el historial del navegador. Para eso, abre esta página en una ventana privada.</p>
+      </div>
+      <div>
+        <h2>Comunidad</h2>
+        ${fb ? `<p>Únete al grupo de Facebook.</p><p><a href="${esc(fb)}" target="_blank" rel="noopener noreferrer">${esc(SITIO.facebook.texto)}</a> (se abre en una pestaña nueva)</p>` : ""}
+        <p>Lo que guardas, tus velas y tu recorrido se almacenan solo en este navegador. Nadie más los ve.</p>
+        <p><button type="button" class="enlace-boton" id="borrar-datos">Borrar lo que guardé en este navegador</button></p>
+      </div>
     </div>`;
+    const b = $("#borrar-datos");
+    if (b) b.addEventListener("click", () => {
+      if (window.confirm("¿Borrar tus historias guardadas, tus velas y tu recorrido de este navegador?")) {
+        Lector.borrarTodo();
+        location.reload();
+      }
+    });
   }
 }
 
+/* ---------- Iconos ---------- */
 const ICONO_VELA = `<svg viewBox="0 0 20 26" aria-hidden="true"><path d="M10 1C14 6 15.5 9 15.5 11.5A5.5 5.5 0 0 1 4.5 11.5C4.5 9 6 6 10 1Z" fill="#c4571a" stroke="currentColor" stroke-width="1.6"/></svg>`;
+const ICONO_VELA_BOTON = `<svg viewBox="0 0 20 26" aria-hidden="true"><path class="llama" d="M10 1C14 6 15.5 9 15.5 11.5A5.5 5.5 0 0 1 4.5 11.5C4.5 9 6 6 10 1Z"/><rect x="7" y="17" width="6" height="8" rx="1" fill="currentColor"/></svg>`;
+const ICONO_MARCADOR = `<svg viewBox="0 0 20 24" aria-hidden="true"><path class="marcador" d="M4 2h12v20l-6-5-6 5Z"/></svg>`;
+const ICONO_COMPARTIR = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICONO_CHECK = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICONO_AVISO = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v5M12 17.6v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+
+/* ---------- Seguridad: salida rápida ----------
+   Un botón siempre visible que reemplaza la página por un sitio neutral
+   (location.replace no deja esta página como "atrás" en ese historial).
+   Una página web no puede borrar el historial del navegador; el pie lo explica. */
+function salirRapido() {
+  try { sessionStorage.clear(); } catch (e) { /* ignorar */ }
+  const url = (SITIO.salidaRapida && SITIO.salidaRapida.url) || "https://www.google.com";
+  location.replace(url);
+}
+
+function instalarSalidaRapida() {
+  if ($("#salida-rapida") || !SITIO.salidaRapida) return;
+  const b = document.createElement("button");
+  b.type = "button"; b.id = "salida-rapida"; b.className = "salida-rapida";
+  b.setAttribute("aria-label", "Salida rápida: salir de esta página ahora y abrir un sitio neutral");
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5M15 8l5 4-5 4M20 12H9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${esc(SITIO.salidaRapida.texto || "Salida rápida")}</span>`;
+  b.addEventListener("click", salirRapido);
+  document.body.appendChild(b);
+  let ultima = 0;
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    const ahora = Date.now();
+    if (ahora - ultima < 900) salirRapido();
+    ultima = ahora;
+  });
+}
+
+/* ---------- Imágenes: duotono vinotinto y gris pizarra ----------
+   Unifica toda la imagen editorial con la paleta y suaviza el contraste.
+   Se aplica con CSS (filter: url(#duotono)) a las portadas. */
+function instalarFiltroDuotono() {
+  if ($("#duotono")) return;
+  const caja = document.createElement("div");
+  caja.setAttribute("aria-hidden", "true");
+  caja.innerHTML = `<svg width="0" height="0" style="position:absolute" focusable="false"><filter id="duotono" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues=".118 .337 .91"/>
+      <feFuncG type="table" tableValues=".118 .027 .812"/>
+      <feFuncB type="table" tableValues=".118 .047 .788"/>
+    </feComponentTransfer></filter></svg>`;
+  document.body.prepend(caja);
+}

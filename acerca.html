@@ -2,26 +2,31 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#56070c">
 <title>De qué se trata · Manemus</title>
 <meta name="description" content="Manemus reúne relatos sobre lo que la violencia dejó en la vida de las personas en Colombia. Cada historia se puede leer o escuchar.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..700;1,400..600&family=Montserrat:wght@500..800&display=swap">
 <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
 <div class="proto" id="proto"></div>
-
+<div class="barra">
+  <div class="envoltura">
+    <header class="cab">
+      <a class="marca" href="index.html">Manemus</a>
+      <nav class="nav" aria-label="Principal">
+        <a href="index.html">Historias</a>
+        <a href="acerca.html" aria-current="page">De qué se trata</a>
+        <a href="#" data-facebook>Facebook</a>
+      </nav>
+    </header>
+  </div>
+</div>
 <div class="envoltura">
-  <header class="cab">
-    <a class="marca" href="index.html">Manemus</a>
-    <nav class="nav" aria-label="Principal">
-      <a href="index.html">Historias</a>
-      <a href="acerca.html" aria-current="page">De qué se trata</a>
-    </nav>
-  </header>
-
   <main id="contenido">
     <article class="acerca">
       <h1>De qué se trata</h1>
@@ -36,14 +41,17 @@
 
       <p class="nombre-nota"><em>Manemus</em> significa &ldquo;permanecemos&rdquo; en latín. El nombre habla de lo que pasó, y también de quienes siguen aquí.</p>
 
-      <p class="acerca-accion"><a class="boton" href="index.html">Ver las historias</a></p>
+      <div class="acerca-accion">
+        <a class="boton" href="index.html">Ver las historias</a>
+        <a class="boton sec" href="#" data-facebook>Ir al grupo de Facebook</a>
+      </div>
     </article>
   </main>
 </div>
 
 <footer class="pie" id="pie"></footer>
 
-<noscript><div class="envoltura"><p>Este sitio necesita JavaScript para mostrar algunas partes.</p></div></noscript>
+<noscript><div class="envoltura"><p>Este sitio necesita JavaScript para mostrar las historias.</p></div></noscript>
 <script src="js/comun.js"></script>
 <script>pintarMarco();</script>
 </body>

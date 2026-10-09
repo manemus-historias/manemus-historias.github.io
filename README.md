@@ -73,6 +73,23 @@ herramientas/           scripts opcionales de ayuda
 
 Los contadores por categoría y el orden de la portada (la más reciente primero) se calculan solos.
 
+## Interacción para quien visita
+
+Todo se guarda **solo en el navegador de cada persona** (no hay servidor ni cuentas, y no se recogen datos):
+
+- **Guardar para después**: botón en cada historia y en cada tarjeta. En la portada, el filtro *Mis guardadas* las reúne.
+- **Encender una vela**: reacción personal y silenciosa. Solo la ve quien la enciende (no hay contador compartido).
+- **Compartir**: usa el menú nativo del celular. Si no existe, ofrece WhatsApp y copiar enlace.
+- **Mi recorrido**: una historia cuenta como terminada cuando la persona llega al final del texto o termina de escucharla. Cada categoría recorrida se colorea y se muestra "Has recorrido X de 7 formas de contar".
+- **Borrar lo que guardé**: en el pie de página.
+- **Pausa**: al terminar una historia aparece un mensaje que invita a respirar antes de seguir.
+
+Un contador compartido de velas necesitaría una base de datos en línea; por ahora no se incluye.
+
+## Enlace al grupo de Facebook
+
+Se define una sola vez en `js/comun.js` (bloque `SITIO.facebook`). Aparece en el menú, en el pie, al terminar cada historia y en *De qué se trata*. Para ocultarlo en todas partes, deja `url: ""`.
+
 ## Cómo funciona la escucha
 
 - **Con `audio`**: la página muestra un reproductor con la narración grabada.
@@ -96,6 +113,30 @@ Añade `?vista-previa` a la dirección, por ejemplo `historia.html?id=mi-histori
 - **Titular y párrafo de la portada**: en `index.html`, dentro de `<section class="intro">`.
 - **Página "De qué se trata"**: el texto está en `acerca.html`.
 - **Aviso de que las historias son ficticias** en esa página: se controla en `js/comun.js` con `historiasFicticias` y `ficticiaIntro`. Cuando se publiquen testimonios reales, cambia `historiasFicticias` a `false` y revisa el texto de consentimiento.
+
+## Sistema de diseño
+
+Paleta 60-30-10, definida como tokens al inicio de `css/estilos.css`:
+
+| Uso | Color |
+|---|---|
+| Fondo y tarjetas (60%) | Hueso `#F7F4F0` (nunca blanco puro) |
+| Encabezados, barra, héroe y pie (30%) | Vinotinto `#56070c` |
+| Acciones principales, líneas de ayuda, avisos (10%) | Mostaza `#D99B00` |
+| Recuperación, apoyo y testimonios | Oliva `#4A5D4E` |
+| Texto | `#1E1E1E` |
+
+- **Tipografías**: Montserrat (títulos) e Inter (texto), con interlineado de 1,7 a 1,85 en lo que se lee y mucho espacio entre bloques.
+- **Imágenes**: sin imágenes gráficas ni de violencia. Las portadas pasan por un filtro duotono vinotinto y gris pizarra (definido en `instalarFiltroDuotono` de `js/comun.js`), así que cualquier imagen que se suba queda con el mismo estilo.
+- **Colores de las categorías**: son tonos de la misma paleta y están en `data/categorias.json`.
+- **Sin modo oscuro**: se quitó para respetar la paleta exacta.
+- **Responsive**: probado sin desbordes entre 320 y 1920 px. Las tarjetas se adaptan a su propio ancho, y en celular las historias aparecen antes que el recorrido.
+
+## Salida rápida
+
+Botón mostaza siempre visible en todas las páginas. Al pulsarlo (o al pulsar Esc dos veces seguidas) cierra la sesión de la página y la reemplaza por un sitio neutral. La dirección se cambia en `js/comun.js`, bloque `SITIO.salidaRapida`.
+
+**Limitación**: una página web no puede borrar el historial del navegador. El pie lo explica y recomienda una ventana privada.
 
 ## Cambiar el nombre y la identidad visual
 
